@@ -1,0 +1,118 @@
+This document describes how to test the various use cases of the Boostly application.
+
+You can use tools like `curl` or a GUI-based API client like Postman to test the endpoints.
+
+**Base URL:** `http://127.0.0.1:8000`
+
+---
+
+### Use Case 1: Create Students
+
+**Description:** Create a few students to test the application with.
+
+**Steps:**
+1.  Send a `POST` request to `/students/` with the following body:
+    ```json
+    {
+      "name": "Alice"
+    }
+    ```
+2.  Send another `POST` request to `/students/` with the following body:
+    ```json
+    {
+      "name": "Bob"
+    }
+    ```
+3.  Send a third `POST` request to `/students/` with the following body:
+    ```json
+    {
+      "name": "Charlie"
+    }
+    ```
+
+**Expected Result:**
+*   Each request should return a `200 OK` status code with the student details in the response body.
+*   You should have three students in the database with IDs 1, 2, and 3.
+
+---
+
+### Use Case 2: Send a Recognition
+
+**Description:** Alice sends a recognition of 20 credits to Bob.
+
+**Steps:**
+1.  Send a `POST` request to `/recognitions/` with the following body:
+    ```json
+    {
+      "sender_id": 1,
+      "receiver_id": 2,
+      "credits": 20,
+      "message": "Thanks for your help!"
+    }
+    ```
+
+**Expected Result:**
+*   The request should return a `200 OK` status code with the recognition details.
+*   Alice's `credits_to_give` should be 80.
+*   Bob's `credits_received` should be 20.
+
+---
+
+### Use Case 3: Endorse a Recognition
+
+**Description:** Charlie endorses the recognition that Alice sent to Bob.
+
+**Steps:**
+1.  Send a `POST` request to `/recognitions/1/endorse` with the following query parameters:
+    *   `endorser_id`: 3
+
+**Expected Result:**
+*   The request should return a `200 OK` status code with the endorsement details.
+*   The endorsement count for recognition with ID 1 should be 1.
+
+---
+
+### Use Case 4: Redeem Credits
+
+**Description:** Bob redeems 15 of his received credits.
+
+**Steps:**
+1.  Send a `POST` request to `/redemptions/` with the following body:
+    ```json
+    {
+      "student_id": 2,
+      "credits": 15
+    }
+    ```
+
+**Expected Result:**
+*   The request should return a `200 OK` status code with the redemption details, including a `voucher_value` of 75.
+*   Bob's `credits_received` should be 5.
+
+---
+
+### Use Case 5: Credit Reset
+
+**Description:** Trigger the monthly credit reset.
+
+**Steps:**
+1.  Send a `POST` request to `/students/reset-credits`.
+
+**Expected Result:**
+*   The request should return a `200 OK` status code with the message "Credits reset for all students.".
+*   Alice's `credits_to_give` should be 100 + 50 (carry-over) = 150.
+*   Bob's `credits_to_give` should be 100.
+*   Charlie's `credits_to_give` should be 100.
+
+---
+
+### Use Case 6: Get Leaderboard
+
+**Description:** Get the leaderboard of top students.
+
+**Steps:**
+1.  Send a `GET` request to `/leaderboard`.
+
+**Expected Result:**
+*   The request should return a `200 OK` status code with a list of students ranked by `total_credits_received`.
+*   Bob should be at the top of the leaderboard.
