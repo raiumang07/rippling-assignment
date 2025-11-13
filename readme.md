@@ -137,8 +137,13 @@ A peer recognition platform for college students built with Python FastAPI. This
 #### Endorse Recognition
 - **Endpoint:** `POST /recognitions/{recognition_id}/endorse`
 - **Description:** Endorse/like an existing recognition
-- **Query Parameter:** `endorser_id` (integer)
-- **Example:** `POST /recognitions/1/endorse?endorser_id=3`
+- **Request Body:**
+  ```json
+  {
+    "endorser_id": 3
+  }
+  ```
+- **Example:** `POST /recognitions/1/endorse` with JSON body above
 - **Response (200 OK):**
   ```json
   {
@@ -281,7 +286,9 @@ curl -X POST "http://127.0.0.1:8000/recognitions/" \
 
 **Endorse recognition:**
 ```bash
-curl -X POST "http://127.0.0.1:8000/recognitions/1/endorse?endorser_id=3"
+curl -X POST "http://127.0.0.1:8000/recognitions/1/endorse" \
+  -H "Content-Type: application/json" \
+  -d '{"endorser_id": 3}'
 ```
 
 **Redeem credits:**

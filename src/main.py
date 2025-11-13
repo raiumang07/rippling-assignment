@@ -102,42 +102,6 @@ class EndorsementBase(BaseModel):
 class EndorsementCreate(EndorsementBase):
     pass
 
-class EndorsementBody(BaseModel):
-    endorser_id: int
-
-class EndorsementSchema(EndorsementBase):
-    id: int
-    timestamp: datetime
-
-    class Config:
-        orm_mode = True
-
-class RedemptionBase(BaseModel):
-    student_id: int
-    credits: int
-
-class RedemptionCreate(RedemptionBase):
-    pass
-
-class RedemptionSchema(RedemptionBase):
-    id: int
-    voucher_value: float
-    timestamp: datetime
-
-    class Config:
-        orm_mode = True
-
-
-# FastAPI app
-app = FastAPI()
-
-# Dependency to get DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @app.get("/")
 def read_root():
