@@ -28,6 +28,50 @@ This document provides instructions on how to set up and run the Boostly applica
 
 The base URL for all endpoints is `http://127.0.0.1:8000`.
 
+### Error Responses
+
+The API uses standard HTTP status codes to indicate the success or failure of a request. In case of an error, the response body will contain a JSON object with a `detail` key explaining the error.
+
+*   **404 Not Found:** This error is returned when a specific resource is not found.
+    *   **Example:** Requesting a student with an ID that does not exist (`GET /students/999`).
+        ```json
+        {
+          "detail": "Student not found"
+        }
+        ```
+
+*   **400 Bad Request:** This error is returned when a business rule is violated.
+    *   **Example:** A student tries to send more credits than they have.
+        ```json
+        {
+          "detail": "Insufficient credits to give"
+        }
+        ```
+    *   **Example:** A student tries to endorse the same recognition twice.
+        ```json
+        {
+          "detail": "You have already endorsed this recognition"
+        }
+        ```
+
+*   **422 Unprocessable Entity:** This error is returned by FastAPI automatically if the request body does not match the expected schema.
+    *   **Example:** Sending a non-integer value for `credits`.
+        ```json
+        {
+          "detail": [
+            {
+              "loc": [
+                "body",
+                "credits"
+              ],
+              "msg": "value is not a valid integer",
+              "type": "type_error.integer"
+            }
+          ]
+        }
+        ```
+
+
 ### Students
 
 *   **Create a new student**
@@ -87,9 +131,12 @@ The base URL for all endpoints is `http://127.0.0.1:8000`.
 
 *   **Endorse a recognition**
     *   **Endpoint:** `POST /recognitions/{recognition_id}/endorse`
-    *   **Request Parameters:**
-        *   `recognition_id`: The ID of the recognition to endorse.
-        *   `endorser_id`: The ID of the student endorsing the recognition.
+    *   **Request Body:**
+        ```json
+        {
+          "endorser_id": 3
+        }
+        ```
     *   **Response:**
         ```json
         {

@@ -51,6 +51,16 @@ class Endorsement(Base):
     recognition = relationship("Recognition", back_populates="endorsements")
     endorser = relationship("Student")
 
+class Redemption(Base):
+    __tablename__ = "redemptions"
+    id = Column(Integer, primary_key=True, index=True)
+    student_id = Column(Integer, ForeignKey("students.id"))
+    credits = Column(Integer)
+    voucher_value = Column(Integer)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    student = relationship("Student")
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -92,8 +102,26 @@ class EndorsementBase(BaseModel):
 class EndorsementCreate(EndorsementBase):
     pass
 
+class EndorsementBody(BaseModel):
+    endorser_id: int
+
 class EndorsementSchema(EndorsementBase):
     id: int
+    timestamp: datetime
+
+    class Config:
+        orm_mode = True
+
+class RedemptionBase(BaseModel):
+    student_id: int
+    credits: int
+
+class RedemptionCreate(RedemptionBase):
+    pass
+
+class RedemptionSchema(RedemptionBase):
+    id: int
+    voucher_value: float
     timestamp: datetime
 
     class Config:
@@ -159,24 +187,24 @@ def create_recognition(recognition: RecognitionCreate, db: Session = Depends(get
     return db_recognition
 
 @app.post("/recognitions/{recognition_id}/endorse", response_model=EndorsementSchema)
-def endorse_recognition(recognition_id: int, endorser_id: int, db: Session = Depends(get_db)):
+def endorse_recognition(recognition_id: int, endorsement: EndorsementBody, db: Session = Depends(get_db)):
     recognition = db.query(Recognition).filter(Recognition.id == recognition_id).first()
     if not recognition:
         raise HTTPException(status_code=404, detail="Recognition not found")
 
-    endorser = db.query(Student).filter(Student.id == endorser_id).first()
+    endorser = db.query(Student).filter(Student.id == endorsement.endorser_id).first()
     if not endorser:
         raise HTTPException(status_code=404, detail="Endorser not found")
 
     existing_endorsement = db.query(Endorsement).filter(
         Endorsement.recognition_id == recognition_id,
-        Endorsement.endorser_id == endorser_id
+        Endorsement.endorser_id == endorsement.endorser_id
     ).first()
 
     if existing_endorsement:
         raise HTTPException(status_code=400, detail="You have already endorsed this recognition")
 
-    db_endorsement = Endorsement(recognition_id=recognition_id, endorser_id=endorser_id)
+    db_endorsement = Endorsement(recognition_id=recognition_id, endorser_id=endorsement.endorser_id)
     db.add(db_endorsement)
     db.commit()
     db.refresh(db_endorsement)

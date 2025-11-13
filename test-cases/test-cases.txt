@@ -63,8 +63,12 @@ You can use tools like `curl` or a GUI-based API client like Postman to test the
 **Description:** Charlie endorses the recognition that Alice sent to Bob.
 
 **Steps:**
-1.  Send a `POST` request to `/recognitions/1/endorse` with the following query parameters:
-    *   `endorser_id`: 3
+1.  Send a `POST` request to `/recognitions/1/endorse` with the following body:
+    ```json
+    {
+      "endorser_id": 3
+    }
+    ```
 
 **Expected Result:**
 *   The request should return a `200 OK` status code with the endorsement details.
